@@ -1,0 +1,82 @@
+#!/usr/bin/env python3
+
+from datetime import datetime, timedelta
+from json import dumps
+
+
+class YearHalf:
+    def __init__(self, this_time):
+        self.this_time = this_time
+
+    def start_date(self):
+        """Return the start date of the half-year."""
+        if self.this_time.month <= 6:
+            return datetime(self.this_time.year, 1, 1).date()
+        else:
+            return datetime(self.this_time.year, 7, 1).date()
+
+    def end_date(self):
+        """Return the end date of the half-year."""
+        if self.this_time.month <= 6:
+            return datetime(self.this_time.year, 6, 30).date()
+        else:
+            return datetime(self.this_time.year, 12, 31).date()
+
+    def name(self):
+        """Return the name of the half-year."""
+        if self.this_time.month <= 6:
+            return "h1"
+        else:
+            return "h2"
+
+    def year(self):
+        """Return the year of the half-year."""
+        return self.this_time.year
+
+
+class Quarter:
+    def __init__(self, this_time):
+        self.this_time = this_time
+
+    def start_date(self):
+        """Return the start date of the quarter."""
+        return datetime(
+            self.this_time.year, (self.this_time.month - 1) // 3 * 3 + 1, 1
+        ).date()
+
+    def end_date(self):
+        """Return the end date of the quarter."""
+        return datetime(
+            self.this_time.year, (self.this_time.month - 1) // 3 * 3 + 3, 30
+        ).date()
+
+    def name(self):
+        """Return the name of the quarter."""
+        return f"q{(self.this_time.month-1)//3+1}"
+
+    def year(self):
+        """Return the year of the quarter."""
+        return self.this_time.year
+
+
+last_quarter = datetime.now() - timedelta(days=90)
+yh = YearHalf(last_quarter)
+yq = Quarter(last_quarter)
+
+json_data = {
+    "year": yh.year(),
+    "half_year": {
+        "name": yh.name(),
+        "start_date": str(yh.start_date()),
+        "end_date": str(yh.end_date()),
+    },
+    "quarter": {
+        "name": yq.name(),
+        "start_date": str(yq.start_date()),
+        "end_date": str(yq.end_date()),
+    },
+}
+
+print(dumps(json_data))
+
+# EOF
