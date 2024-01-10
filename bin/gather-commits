@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# Get the top of the git repository
+top_dir="$(git rev-parse --show-toplevel)"
+
+# Add our utilites to PATH
+PATH="${top_dir}/bin:${PATH}"
+export PATH
+
+# Generate the --author-date flag
+generate_date_flag() {
+	last_quarter |
+		jq -r '.half_year | "--committer-date=\(.start_date)..\(.end_date)"'
+}
+
+date_flag="$(generate_date_flag)"
+readonly date_flag
+
+declare -ar cmd=(
+	gh search commits
+	--limit='1000'
+	--merge
+	--author='@me'
+	"${date_flag}"
+	--sort='author-date'
+	--order='desc'
+	--json='repository,sha,commit'
+)
+
+{
+	printf "+"
+	printf " %q" "${cmd[@]}"
+	printf "\n"
+} >&2
+"${cmd[@]}" |
+	jq '.[]'
+
+# EOF
